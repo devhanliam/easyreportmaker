@@ -94,6 +94,14 @@
             resize: vertical;
             min-height: 100px;
         }
+        .message-box {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        white-space: pre-line; /* 줄바꿈을 유지 */
+        cursor: pointer;
+    }
     </style>
 </head>
 <body>
@@ -234,19 +242,20 @@
 
             messageBox.textContent = '정보 추출이 완료되었습니다.';
         }
-         function copyToClipboard() {
+        function copyToClipboard() {
         const messageBox = document.getElementById('messageBox');
         
         // textContent를 사용하여 줄바꿈을 포함한 텍스트를 복사
-        const messageText = messageBox.textContent;
+        const messageText = messageBox.textContent.replace(/\n/g, '\r\n'); // 모바일 호환성을 위해 \r\n 추가
 
-        // 클립보드에 텍스트 복사
         navigator.clipboard.writeText(messageText).then(() => {
             alert("메시지가 클립보드에 줄바꿈과 함께 복사되었습니다.");
         }).catch(err => {
             console.error("클립보드 복사에 실패했습니다.", err);
         });
     }
+
+
 
         function generateMessage() {
             const today = new Date();
