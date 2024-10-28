@@ -151,7 +151,7 @@
             
             <button onclick="generateMessage()">메시지 추출</button>
             
-            <div class="message-box" id="messageBox"></div>
+            <div class="message-box" id="messageBox" onclick="copyToClipboard();"></div>
         </div>
     </div>
 
@@ -234,6 +234,19 @@
 
             messageBox.textContent = '정보 추출이 완료되었습니다.';
         }
+        function copyToClipboard() {
+        const messageBox = document.getElementById('messageBox');
+        const messageText = messageBox.innerText;
+
+        // 클립보드에 텍스트 복사
+        navigator.clipboard.writeText(messageText).then(() => {
+            // 복사 성공 메시지를 표시하거나 시각적 피드백 추가
+            alert("메시지가 클립보드에 복사되었습니다.");
+        }).catch(err => {
+            console.error("클립보드 복사에 실패했습니다.", err);
+        });
+    }
+
 
         function generateMessage() {
             const today = new Date();
