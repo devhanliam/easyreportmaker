@@ -112,7 +112,8 @@
     <div class="container">
         <div class="pdf-viewer">
             <h2>PDF 미리보기</h2>
-            <canvas id="pdfCanvas"></canvas>
+            <canvas id="pdfCanvas" style="display: none;"></canvas>
+            <img id="pdfImage" alt="PDF 미리보기 이미지" style="max-width: 100%; height: auto;">
         </div>
         
         <div class="info-display">
@@ -169,6 +170,7 @@
         const fileInput = document.getElementById('fileInput');
         const canvas = document.getElementById('pdfCanvas');
         const messageBox = document.getElementById('messageBox');
+        const pdfImage = document.getElementById('pdfImage');
 
         fileInput.addEventListener('change', async (event) => {
             const file = event.target.files[0];
@@ -188,9 +190,11 @@
                         canvasContext: context,
                         viewport: viewport
                     }).promise;
-
+                    const dataURL = canvas.toDataURL('image/png');
+                    pdfImage.src = dataURL;
                     const textContent = await page.getTextContent();
                     extractAndDisplayInfo(textContent.items);
+                    
 
                 } catch (error) {
                     messageBox.textContent = '파일 처리 중 오류가 발생했습니다: ' + error.message;
