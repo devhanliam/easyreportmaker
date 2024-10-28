@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>사업자등록증명 정보 추출기</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style>
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .pdf-viewer {
+            flex: 1;
+            border: 1px solid #ccc;
+            padding: 20px;
+        }
+
+        .info-display {
+            flex: 1;
+            border: 1px solid #ccc;
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+        }
+
+        .radio-group label {
+            font-weight: normal;
+        }
+
+        #fileInput {
+            margin-bottom: 20px;
+        }
+
+        #pdfCanvas {
+            width: 100%;
+            border: 1px solid #eee;
+        }
+
+        .message-box {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            white-space: pre-line;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            min-height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <h1>사업자등록증명 정보 추출기</h1>
+    
+    <input type="file" id="fileInput" accept=".pdf">
+    
+    <div class="container">
+        <div class="pdf-viewer">
+            <h2>PDF 미리보기</h2>
+            <canvas id="pdfCanvas"></canvas>
+        </div>
+        
+        <div class="info-display">
+            <h2>정보 입력</h2>
+            <div class="form-group">
+                <label>상호명</label>
+                <input type="text" id="nameField" readonly>
+            </div>
+            <div class="form-group">
+                <label>대표명</label>
+                <input type="text" id="representField" readonly>
+            </div>
+            <div class="form-group">
+                <label>생년월일</label>
+                <input type="text" id="birthDate" readonly>
+            </div>
+            <div class="form-group">
+                <label>담당자명</label>
+                <input type="text" id="manager">
+            </div>
+            <div class="form-group">
+                <label>특수관계자</label>
+                <input type="text" id="specialRelation">
+            </div>
+            <div class="form-group">
+                <label>최초창업여부</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="firstBusiness" value="O"> O</label>
+                    <label><input type="radio" name="firstBusiness" value="X"> X</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>경정진행 여부 & 받은 연도</label>
+                <input type="text" id="correctionInfo" placeholder="예: 진행중 2024">
+            </div>
+            <div class="form-group">
+                <label>사업장인수시 승계인원 명단</label>
+                <textarea id="successorList"></textarea>
+            </div>
+            <div class="form-group">
+                <label>특이사항</label>
+                <textarea id="specialNote"></textarea>
+            </div>
+            
+            <button onclick="generateMessage()">메시지 추출</button>
+            
+            <div class="message-box" id="messageBox"></div>
+        </div>
+    </div>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        const fileInput = document.getElementById('fileInput');
+        const canvas = document.getElementById('pdfCanvas');
+        const messageBox = document.getElementById('messageBox');
+
+        fileInput.addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (file && file.type === 'application/pdf') {
+                try {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                    
+                    const page = await pdf.getPage(1);
+                    const viewport = page.getViewport({ scale: 1.5 });
+                    
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    
+                    const context = canvas.getContext('2d');
+                    await page.render({
+                        canvasContext: context,
+                        viewport: viewport
+                    }).promise;
+
+                    const textContent = await page.getTextContent();
+                    extractAndDisplayInfo(textContent.items);
+
+                } catch (error) {
+                    messageBox.textContent = '파일 처리 중 오류가 발생했습니다: ' + error.message;
+                }
+            } else {
+                messageBox.textContent = 'PDF 파일만 업로드 가능합니다.';
+            }
+        });
+
+        function extractAndDisplayInfo(textItems) {
+            const text = textItems.map(item => item.str).join(' ');
+            console.log(text);
+            // 법인 vs 개인사업자 구분하여 상호명/대표자명 추출
+            const isCorp = text.match(/법\s*인\s*사\s*업\s*자\s*/);
+            const isNotCorp = text.match(/일\s*반\s*과\s*세\s*자\s*/);
+            const corporateNameMatch = text.match(/상\s*호\s*:\s*([^\n]+)/);
+            // const representativeMatch = text.match(/성\s+명\s*:\s*([가-힣]\s*[가-힣]\s*[가-힣])/);
+            // const representativeMatch = text.match(/성\s+명\s*\(\s*대\s+표\s+자\s*\)\s*대\s+표\s+유\s+형\s+([가-힣\s]+외\s+\d+\s+명)(?=\s+주\s+민)/);
+            const representativeMatch = text.match(/성\s+명\s*\(\s*대\s+표\s+자\s*\)\s*대\s+표\s+유\s+형\s+([가-힣\s]+(?:\s+외\s+\d+\s+명)?)\s*주\s*민/);
+
+            console.log(representativeMatch);
+            // 사용 예시
+            if (representativeMatch) {
+                const representative = representativeMatch[1].trim(); // 결과: "이 종 석 외 1 명"
+                // 공백 제거가 필요한 경우
+                const representativeNoSpace = representative.replace(/\s+/g, ' ').trim(); // 결과: "이종석 외 1명"
+                document.querySelector("#representField").value = representativeNoSpace;
+            }
+    
+            const companyNameMatch = text.match(/상\s+호\s*\(\s*법\s+인\s+명\s*\)\s*([가-힣\s]+)(?=사\s+업\s+자)/);
+
+            // 사용 예시
+            if (companyNameMatch) {
+                const companyName = companyNameMatch[1].replace(/\s+/g, ''); // 결과: "꺼벙이분식"
+                document.querySelector("#nameField").value = companyName;
+            }
+            const birthDateMatch = text.match(/주\s*민\s*\(.*?\)\s*등\s*록\s*번\s*호\s*([\d\s]{11})/);
+            console.log(birthDateMatch);
+            const birthDate = isCorp ? "법인" : birthDateMatch[1].replace(/\s+/g, '');;
+            document.querySelector("#birthDate").value = birthDate;
+            // const re
+
+            // document.getElementById('nameField').value = corporateNameMatch ? 
+            //     corporateNameMatch[1].trim() : 
+            //     (representativeMatch ? representativeMatch[1].trim() : '');
+
+            // 수정된 생년월일 추출 및 포맷 변환
+            
+
+            messageBox.textContent = '정보 추출이 완료되었습니다.';
+        }
+
+        function generateMessage() {
+            const today = new Date();
+            const dateStr = `${today.getFullYear()}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getDate().toString().padStart(2, '0')}`;
+            
+            const message = `■새올전송
+○ 전송일 : ${dateStr}
+○ 상호명 : ${document.getElementById('nameField').value}
+○ 대표자 : ${document.getElementById('representField').value}
+○ 생년월일 : ${document.getElementById('birthDate').value}
+○ 특수관계자 : ${document.getElementById('specialRelation').value}
+○ 담당자 : ${document.getElementById('manager').value}
+○ 최초창업여부 : ${document.querySelector('input[name="firstBusiness"]:checked')?.value || ''}
+○ 특이사항 : ${document.getElementById('specialNote').value}
+○ 사업장인수시 승계인원 명단 : ${document.getElementById('successorList').value}
+○ 경정진행 여부 & 받은연도 : ${document.getElementById('correctionInfo').value}`;
+
+            messageBox.textContent = message;
+        }
+    </script>
+</body>
+</html>
