@@ -15,11 +15,10 @@
         .container {
             display: flex;
             gap: 20px;
-            flex-direction: column; /* 모바일에서는 수직 배열 */
         }
 
-        .pdf-viewer,
-        .info-display {
+        .pdf-viewer, .info-display {
+            flex: 1;
             border: 1px solid #ccc;
             padding: 20px;
         }
@@ -34,8 +33,7 @@
             font-weight: bold;
         }
 
-        .form-group input,
-        .form-group textarea {
+        .form-group input, .form-group textarea {
             width: 100%;
             padding: 8px;
             border: 1px solid #ddd;
@@ -45,6 +43,10 @@
         .radio-group {
             display: flex;
             gap: 20px;
+        }
+
+        .radio-group label {
+            font-weight: normal;
         }
 
         #fileInput {
@@ -79,40 +81,14 @@
             background-color: #0056b3;
         }
 
-        @media (min-width: 768px) {
-            .container {
-                flex-direction: row;
-            }
-
-            .pdf-viewer,
-            .info-display {
-                flex: 1;
-            }
-        }
-
+        /* 반응형 스타일 */
         @media (max-width: 768px) {
-            .form-group input,
-            .form-group textarea,
-            button {
-                font-size: 14px;
-                padding: 10px;
+            .container {
+                flex-direction: column;
             }
 
-            h2 {
-                font-size: 18px;
-            }
-
-            h1 {
-                font-size: 24px;
-            }
-
-            .pdf-viewer img {
-                max-width: 100%;
-                height: auto;
-            }
-
-            #fileInput {
-                width: 100%;
+            .pdf-viewer, .info-display {
+                padding: 15px;
             }
         }
     </style>
@@ -160,7 +136,7 @@
             </div>
             <div class="form-group">
                 <label>경정진행 여부 & 받은 연도</label>
-                <input type="text" id="correctionInfo" >
+                <input type="text" id="correctionInfo">
             </div>
             <div class="form-group">
                 <label>사업장인수시 승계인원 명단</label>
@@ -176,6 +152,7 @@
             <div class="message-box" id="messageBox" onclick="copyToClipboard();"></div>
         </div>
     </div>
+
 
 
     <script>
