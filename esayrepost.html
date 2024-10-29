@@ -109,15 +109,15 @@
             <h2 class="text-lg font-semibold mb-4">정보 입력</h2>
             <div class="form-group mb-4">
                 <label class="block font-semibold mb-1">상호명</label>
-                <input type="text" id="nameField" readonly class="w-full p-2 border border-gray-300 rounded">
+                <input type="text" id="nameField"  class="w-full p-2 border border-gray-300 rounded">
             </div>
             <div class="form-group mb-4">
                 <label class="block font-semibold mb-1">대표명</label>
-                <input type="text" id="representField" readonly class="w-full p-2 border border-gray-300 rounded">
+                <input type="text" id="representField"  class="w-full p-2 border border-gray-300 rounded">
             </div>
             <div class="form-group mb-4">
                 <label class="block font-semibold mb-1">생년월일</label>
-                <input type="text" id="birthDate" readonly class="w-full p-2 border border-gray-300 rounded">
+                <input type="text" id="birthDate"  class="w-full p-2 border border-gray-300 rounded">
             </div>
             <div class="form-group mb-4">
                 <label class="block font-semibold mb-1">담당자명</label>
@@ -125,7 +125,7 @@
             </div>
             <div class="form-group mb-4">
                 <label class="block font-semibold mb-1">특수관계자</label>
-                <input type="text" id="specialRelation" class="w-full p-2 border border-gray-300 rounded">
+                <input type="text" id="specialRelation" class="w-full p-2 border border-gray-300 rounded if-none-x">
             </div>
             <div class="form-group">
                 <label>최초창업여부</label>
@@ -137,15 +137,15 @@
             
             <div class="form-group mb-4">
                 <label class="block font-semibold mb-1">경정진행 여부 & 받은 연도</label>
-                <input type="text" id="correctionInfo" class="w-full p-2 border border-gray-300 rounded">
+                <input type="text" id="correctionInfo" class="w-full p-2 border border-gray-300 rounded if-none-x">
             </div>
             <div class="form-group mb-4">
                 <label class="block font-semibold mb-1">사업장인수시 승계인원 명단</label>
-                <textarea id="successorList" class="w-full p-2 border border-gray-300 rounded resize-y min-h-[100px]"></textarea>
+                <textarea id="successorList" class="w-full p-2 border border-gray-300 rounded resize-y min-h-[100px] if-none-x"></textarea>
             </div>
             <div class="form-group mb-4">
                 <label class="block font-semibold mb-1">특이사항</label>
-                <textarea id="specialNote" class="w-full p-2 border border-gray-300 rounded resize-y min-h-[100px]"></textarea>
+                <textarea id="specialNote" class="w-full p-2 border border-gray-300 rounded resize-y min-h-[100px] if-none-x"></textarea>
             </div>
 
             <button onclick="generateMessage()" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">양식 생성</button>
@@ -202,25 +202,28 @@
             const isNotCorp = text.match(/일\s*반\s*과\s*세\s*자\s*/);
             const corporateNameMatch = text.match(/상\s*호\s*:\s*([^\n]+)/);
             // const representativeMatch = text.match(/성\s+명\s*:\s*([가-힣]\s*[가-힣]\s*[가-힣])/);
-            // const representativeMatch = text.match(/성\s+명\s*\(\s*대\s+표\s+자\s*\)\s*대\s+표\s+유\s+형\s+([가-힣\s]+외\s+\d+\s+명)(?=\s+주\s+민)/);
             const representativeMatch = text.match(/성\s+명\s*\(\s*대\s+표\s+자\s*\)\s*대\s+표\s+유\s+형\s+([가-힣\s]+(?:\s+외\s+\d+\s+명)?)\s*주\s*민/);
-
+            
+            console.log("====대표자명====");
             console.log(representativeMatch);
             // 사용 예시
             if (representativeMatch) {
                 const representative = representativeMatch[1].trim(); // 결과: "이 종 석 외 1 명"
                 // 공백 제거가 필요한 경우
-                const representativeNoSpace = representative.replace(/\s+/g, ' ').trim(); // 결과: "이종석 외 1명"
+                const representativeNoSpace = representative.replace(/\s+/g, '').trim(); // 결과: "이종석 외 1명"
                 document.querySelector("#representField").value = representativeNoSpace;
             }
     
-            const companyNameMatch = text.match(/상\s+호\s*\(\s*법\s+인\s+명\s*\)\s*([가-힣\s]+)(?=사\s+업\s+자)/);
-
+            // const companyNameMatch = text.match(/상\s+호\s*\(\s*법\s+인\s+명\s*\)\s*([가-힣\s]+)(?=사\s+업\s+자)/);
+            const companyNameMatch = text.match(/상\s*호\s*\(\s*법\s*인\s*명\s*\)\s*(\(\s*주\s*\)\s*)?([（）\(\)\s가-힣]+)(?=\s*사\s*업\s*자)/);
+            console.log("====가게명====");
+            console.log(companyNameMatch);
             // 사용 예시
             if (companyNameMatch) {
-                const companyName = companyNameMatch[1].replace(/\s+/g, ''); // 결과: "꺼벙이분식"
+                const companyName = companyNameMatch[2].replace(/\s+/g, ''); 
                 document.querySelector("#nameField").value = companyName;
             }
+
             const birthDateMatch = text.match(/주\s*민\s*\(.*?\)\s*등\s*록\s*번\s*호\s*([\d\s]{11})/);
             console.log(birthDateMatch);
             const birthDate = isCorp ? "법인" : birthDateMatch[1].replace(/\s+/g, '');;
@@ -254,7 +257,10 @@
         function generateMessage() {
             const today = new Date();
             const dateStr = `${today.getFullYear()}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getDate().toString().padStart(2, '0')}`;
-            
+            document.querySelectorAll(".if-none-x").forEach(e => {
+                if(e.value === ''){
+                    e.value = "X"}
+                });
             const message = `■새올전송
 ○ 전송일 : ${dateStr}
 ○ 상호명 : ${document.getElementById('nameField').value}
