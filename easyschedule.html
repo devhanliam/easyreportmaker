@@ -3,47 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>일정 추출</title>
+    <title>일정 추출 및 일정 추가</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
         }
+        textarea, input, select {
+            margin-bottom: 10px;
+            margin-right: 5px;
+        }
         textarea {
             width: 100%;
             height: 200px;
-            margin-bottom: 10px;
         }
         button {
-            display: block;
-            margin-bottom: 10px;
+            margin-right: 5px;
         }
         .output {
             white-space: pre-wrap;
             background-color: #f4f4f4;
             padding: 10px;
             border: 1px solid #ddd;
+            margin-bottom: 10px;
         }
     </style>
+    <script>
+        let hoursOptions = '';
+        for (let h = 0; h < 24; h++) {
+            hoursOptions += `<option value="${h}">${h}시</option>`;
+        }
+
+        let minutesOptions = '';
+        [0, 15, 30, 45].forEach(m => {
+            minutesOptions += `<option value="${m}">${m}분</option>`;
+        });
+
+    </script>
 </head>
 <body>
-    <h1>일정 추출 도구</h1>
+    <h1>일정 추출 및 일정 추가</h1>
     <textarea id="input" placeholder="여기에 문자열을 붙여넣으세요..."></textarea>
     <button onclick="extractData()">추출</button>
     <div class="output" id="output"></div>
     <p id="status" style="color: green; margin-top: 10px;"></p>
-
+    <h2>일정 추가</h2>
+    <input type="text" id="newName" placeholder="업체명">
+    <input type="text" id="newLocation" placeholder="지역">
+    <label for="newType">종류:</label>
+    <select id="newType">
+        <option value="" disabled selected>일정 종류</option>
+        <option value="재방">재방</option>
+        <option value="서류">서류</option>
+        <option value="계약">계약</option>
+    </select>
+    <label for="newHour">시:</label>
+    <select id="newHour">
+        <option value="" disabled selected>시</option>
+        <script>
+            document.write(hoursOptions);
+        </script>
+    </select>
+    <label for="newMinute">분:</label>
+    <select id="newMinute">
+        <option value="" disabled selected>분</option>
+        <script>
+            document.write(minutesOptions);
+        </script>
+    </select>
+    <button onclick="addSchedule()">추가</button>
+    
     <script>
+        let extractedData = [];
+        let manager = "";
+
         function extractData() {
+            extractedData = [];
             const input = document.getElementById('input').value;
             const output = document.getElementById('output');
-            
+
             // 각 줄을 배열로 분리
             const lines = input.trim().split('\n');
             
             // 결과 저장
-            let manager = "";
-            const extractedData = [];
+
+            // const extractedData = [];
 
             // 각 줄에서 데이터 추출
             lines.forEach((line, index) => {
@@ -97,8 +141,58 @@
             output.textContent = result.trim();
         }
 
-                // 복사 기능 구현
-            document.getElementById('output').addEventListener('click', function () {
+        function renderOutputCall() {
+            const output = document.getElementById('output');
+            let result = manager + "\n";
+            extractedData.forEach((data, idx) => {
+                result += `${idx + 1}. ${data.name} ${data.location} ${data.time} 콜지\n`;
+            });
+            output.textContent = result.trim();
+        }
+
+        function renderOutput() {
+            const output = document.getElementById('output');
+            let result = manager + "\n";
+            console.log(manager);
+            extractedData.forEach((data, idx) => {
+                const typeText = data.type ? data.type : "콜지";
+                result += `${idx + 1}. ${data.name} ${data.location} ${data.time} ${typeText}\n`;
+            });
+            output.textContent = result.trim();
+        }
+
+        function addSchedule() {
+            const newName = document.getElementById('newName').value.trim();
+            const newLocation = document.getElementById('newLocation').value.trim();
+            const newType = document.getElementById('newType').value;
+            const newHour = document.getElementById('newHour').value;
+            const newMinute = document.getElementById('newMinute').value;
+
+            if (!newName || !newLocation || !newType || !newHour || newMinute === "") {
+                alert("모든 항목을 입력해주세요.");
+                return;
+            }
+
+            const time = newMinute === "0" ? `${newHour}시` : `${newHour}시 ${newMinute}분`;
+            
+            extractedData.push({ name: newName, location: newLocation, time, type: newType });
+            extractedData.sort((a, b) => {
+                const getMinutes = (time) => {
+                    const match = time.match(/(\d{1,2})시(?: (\d{2})분)?/);
+                    if (match) {
+                        const hours = parseInt(match[1], 10);
+                        const minutes = match[2] ? parseInt(match[2], 10) : 0;
+                        return hours * 60 + minutes;
+                    }
+                    return 0;
+                };
+                return getMinutes(a.time) - getMinutes(b.time);
+            });
+
+            renderOutput();
+        }
+
+        document.getElementById('output').addEventListener('click', function () {
             const output = document.getElementById('output');
             const text = output.textContent;
 
