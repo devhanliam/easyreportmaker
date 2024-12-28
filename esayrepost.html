@@ -202,7 +202,8 @@
             const isNotCorp = text.match(/일\s*반\s*과\s*세\s*자\s*/);
             const corporateNameMatch = text.match(/상\s*호\s*:\s*([^\n]+)/);
             // const representativeMatch = text.match(/성\s+명\s*:\s*([가-힣]\s*[가-힣]\s*[가-힣])/);
-            const representativeMatch = text.match(/성\s+명\s*\(\s*대\s+표\s+자\s*\)\s*대\s+표\s+유\s+형\s+([가-힣\s]+(?:\s+외\s+\d+\s+명)?)\s*주\s*민/);
+            // const representativeMatch = text.match(/성\s+명\s*\(\s*대\s+표\s+자\s*\)\s*대\s+표\s+유\s+형\s+([가-힣\s]+(?:\s+외\s+\d+\s+명)?)\s*주\s*민/);
+            const representativeMatch = text.match(/성\s+명\s*\(\s*대\s+표\s+자\s*\)\s*대\s+표\s+유\s+형\s+([\s\S]+?)(?=\s*주\s*민)/);
             
             console.log("====대표자명====");
             console.log(representativeMatch);
@@ -215,7 +216,9 @@
             }
     
             // const companyNameMatch = text.match(/상\s+호\s*\(\s*법\s+인\s+명\s*\)\s*([가-힣\s]+)(?=사\s+업\s+자)/);
-            const companyNameMatch = text.match(/상\s*호\s*\(\s*법\s*인\s*명\s*\)\s*(\(\s*주\s*\)\s*)?([（）\(\)\s가-힣]+)(?=\s*사\s*업\s*자)/);
+            // const companyNameMatch = text.match(/상\s*호\s*\(\s*법\s*인\s*명\s*\)\s*(\(\s*주\s*\)\s*)?([（）\(\)\s가-힣]+)(?=\s*사\s*업\s*자)/);
+            const companyNameMatch = text.match(/상\s*호\s*\(\s*법\s*인\s*명\s*\)\s*(\(\s*주\s*\)\s*)?([\s\S]+?)(?=\s*사\s*업\s*자)/
+);
             console.log("====가게명====");
             console.log(companyNameMatch);
             // 사용 예시
