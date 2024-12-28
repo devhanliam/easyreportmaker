@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>일정 추출 및 일정 추가</title>
+    <title>정보 추출 및 일정 추가</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -42,7 +42,7 @@
     </script>
 </head>
 <body>
-    <h1>일정 추출 및 일정 추가</h1>
+    <h1>정보 추출 및 일정 추가</h1>
     <textarea id="input" placeholder="여기에 문자열을 붙여넣으세요..."></textarea>
     <button onclick="extractData()">추출</button>
     <div class="output" id="output"></div>
@@ -174,7 +174,7 @@
             }
 
             const time = newMinute === "0" ? `${newHour}시` : `${newHour}시 ${newMinute}분`;
-            
+            time = newMinute === "0" && newHour === "0" ? "미정" : time;
             extractedData.push({ name: newName, location: newLocation, time, type: newType });
             extractedData.sort((a, b) => {
                 const getMinutes = (time) => {
@@ -188,8 +188,9 @@
                 };
                 return getMinutes(a.time) - getMinutes(b.time);
             });
-
             renderOutput();
+            document.getElementById('newName').value = "";
+            document.getElementById('newLocation').value = "";
         }
 
         document.getElementById('output').addEventListener('click', function () {
