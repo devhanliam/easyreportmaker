@@ -76,7 +76,7 @@
     <script>
         let extractedData = [];
         let manager = "";
-
+        document.getElementById("newMinute").value = 0;
         function extractData() {
             extractedData = [];
             const input = document.getElementById('input').value;
@@ -84,15 +84,10 @@
 
             // 각 줄을 배열로 분리
             const lines = input.trim().split('\n');
-            
-            // 결과 저장
-
-            // const extractedData = [];
 
             // 각 줄에서 데이터 추출
             lines.forEach((line, index) => {
                 const columns = line.split('\t');
-                console.log(columns);
                 if (columns.length > 8) {
                     if (!manager) {
                         manager = columns[11]; // 첫 번째로 등장하는 관리자를 추출
@@ -153,7 +148,6 @@
         function renderOutput() {
             const output = document.getElementById('output');
             let result = manager + "\n";
-            console.log(manager);
             extractedData.forEach((data, idx) => {
                 const typeText = data.type ? data.type : "콜지";
                 result += `${idx + 1}. ${data.name} ${data.location} ${data.time} ${typeText}\n`;
@@ -173,8 +167,8 @@
                 return;
             }
 
-            const time = newMinute === "0" ? `${newHour}시` : `${newHour}시 ${newMinute}분`;
-            time = newMinute === "0" && newHour === "0" ? "미정" : time;
+            let time = newMinute === "0" ? `${newHour}시` : `${newHour}시 ${newMinute}분`;
+            time = time === "0시" ? "미정" : time;
             extractedData.push({ name: newName, location: newLocation, time, type: newType });
             extractedData.sort((a, b) => {
                 const getMinutes = (time) => {
@@ -183,6 +177,9 @@
                         const hours = parseInt(match[1], 10);
                         const minutes = match[2] ? parseInt(match[2], 10) : 0;
                         return hours * 60 + minutes;
+                    }
+                    if(match === null){
+                        return Number.MAX_VALUE;
                     }
                     return 0;
                 };
