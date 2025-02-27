@@ -134,6 +134,20 @@
                     <label><input type="radio" name="firstBusiness" value="X"> X</label>
                 </div>
             </div>
+            <div class="form-group">
+                <label>현근무자 근로계약서여부</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="presentContract" value="O"> O</label>
+                    <label><input type="radio" name="presentContract" value="X"> X</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>퇴사자 근로계약서여부</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="retireContract" value="O"> O</label>
+                    <label><input type="radio" name="retireContract" value="X"> X</label>
+                </div>
+            </div>
             
             <div class="form-group mb-4">
                 <label class="block font-semibold mb-1">경정진행 여부 & 받은 연도</label>
@@ -264,7 +278,8 @@
                 if(e.value === ''){
                     e.value = "X"}
                 });
-            const message = `■새올전송
+            const message = `[새올전송]
+
 ○ 전송일 : ${dateStr}
 ○ 상호명 : ${document.getElementById('nameField').value}
 ○ 대표자 : ${document.getElementById('representField').value}
@@ -274,7 +289,10 @@
 ○ 최초창업여부 : ${document.querySelector('input[name="firstBusiness"]:checked')?.value || ''}
 ○ 특이사항 : ${document.getElementById('specialNote').value}
 ○ 사업장인수시 승계인원 명단 : ${document.getElementById('successorList').value}
-○ 경정진행 여부 & 받은연도 : ${document.getElementById('correctionInfo').value}`;
+○ 경정진행 여부 & 받은연도 : ${document.getElementById('correctionInfo').value}
+○ 현근무자 근로계약서 작성 및 보관여부 : ${document.querySelector('input[name="presentContract"]:checked')?.value || ''}
+○ 퇴사자 근로계약서 보관 여부 :${document.querySelector('input[name="retireContract"]:checked')?.value || ''}
+`;
 
             messageBox.textContent = message;
         }
