@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>식대 정산</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+
+<!-- 총합 표시 -->
+<div class="text-center mb-8">
+  <h1 class="text-3xl font-bold text-gray-800">식대 정산 시스템</h1>
+  <p class="mt-2 text-lg text-blue-600 font-semibold">
+    총 정산 식대 합계: <span id="totalSum">0</span> 원
+  </p>
+</div>
+
+<!-- 입력 필드들 -->
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
+  <!-- JS가 여기에 input 16개 생성 -->
+</div>
+
+<script>
+  const container = document.querySelector('.grid');
+  const totalSumEl = document.getElementById('totalSum');
+  const MAX_AMOUNT = 15000;
+  const NUM_FIELDS = 16;
+
+  let inputs = [];
+
+  function updateTotal() {
+    let total = inputs.reduce((sum, input) => {
+      const value = parseInt(input.value) || 0;
+      return sum + Math.min(value, MAX_AMOUNT);
+    }, 0);
+    totalSumEl.textContent = total.toLocaleString();
+  }
+
+  function createInputRow(index) {
+    const wrapper = document.createElement('div');
+    wrapper.className = "bg-white p-4 rounded-lg shadow flex flex-col gap-2";
+
+    const label = document.createElement('label');
+    label.className = "font-medium text-gray-700";
+    label.textContent = `식대 ${index + 1}`;
+
+    const input = document.createElement('input');
+    input.type = "number";
+    input.min = "0";
+    input.value = "0";
+    input.className = "border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400";
+
+    const resultText = document.createElement('div');
+    resultText.className = "text-sm text-gray-600";
+    resultText.textContent = "입력값: 0원 | 정산식대: 0원";
+
+    input.addEventListener('input', () => {
+      let val = parseInt(input.value) || 0;
+      let adjusted = Math.min(val, MAX_AMOUNT);
+      resultText.textContent = `입력값: ${val.toLocaleString()}원 | 정산식대: ${adjusted.toLocaleString()}원`;
+      updateTotal();
+    });
+
+    wrapper.appendChild(label);
+    wrapper.appendChild(input);
+    wrapper.appendChild(resultText);
+    container.appendChild(wrapper);
+    inputs.push(input);
+  }
+
+  // Create 16 inputs
+  for (let i = 0; i < NUM_FIELDS; i++) {
+    createInputRow(i);
+  }
+
+  // 초기 총합 계산
+  updateTotal();
+</script>
+
+</body>
+</html>
