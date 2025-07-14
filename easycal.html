@@ -10,9 +10,12 @@
 
 <!-- 총합 표시 -->
 <div class="text-center mb-8">
-  <h1 class="text-3xl font-bold text-gray-800">식대 정산 시스템</h1>
+  <h1 class="text-3xl font-bold text-gray-800">식대 정산</h1>
   <p class="mt-2 text-lg text-blue-600 font-semibold">
     총 정산 식대 합계: <span id="totalSum">0</span> 원
+  </p>
+  <p class="mt-1 text-sm text-gray-700" id="sumFormula">
+    <!-- 합산 수식이 여기에 표시됨 -->
   </p>
 </div>
 
@@ -24,17 +27,28 @@
 <script>
   const container = document.querySelector('.grid');
   const totalSumEl = document.getElementById('totalSum');
+  const sumFormulaEl = document.getElementById('sumFormula');
   const MAX_AMOUNT = 15000;
   const NUM_FIELDS = 16;
 
   let inputs = [];
 
   function updateTotal() {
-    let total = inputs.reduce((sum, input) => {
-      const value = parseInt(input.value) || 0;
-      return sum + Math.min(value, MAX_AMOUNT);
-    }, 0);
+    let adjustedValues = inputs.map(input => {
+      const val = parseInt(input.value) || 0;
+      return val > 0 ? Math.min(val, MAX_AMOUNT) : null;
+    }).filter(v => v !== null);
+
+    // 합계
+    const total = adjustedValues.reduce((sum, v) => sum + v, 0);
     totalSumEl.textContent = total.toLocaleString();
+
+    // 수식
+    if (adjustedValues.length > 0) {
+      sumFormulaEl.textContent = adjustedValues.map(v => v.toLocaleString()).join(" + ");
+    } else {
+      sumFormulaEl.textContent = '';
+    }
   }
 
   function createInputRow(index) {
